@@ -1,0 +1,50 @@
+trecho tirado do nosso readme
+
+# Formato das Instruções (16 bits)
+
+As instruções possuem 16 bits e seguem um formato padronizado para facilitar a decodificação pela Unidade de Controle.
+
+## Organização dos Bits
+
+| Bits      | Campo | Descrição |
+|------------|--------|------------|
+| `[15:12]` | `oooo` | Opcode da instrução (4 bits) |
+| `[11:8]`  | `dddd` | Registrador de destino (`Rd`) ou `0000` |
+| `[7:4]`   | `ssss` | Registrador fonte (`Rs`) ou `0000` |
+| `[7:0]`   | `cccccccc` | Constante (`cte`) ou endereço (`addr`) |
+
+Nas instruções do tipo **I** e **J**, o campo `[7:0]` substitui o campo `Rs`.
+
+# Tabela de Opcodes
+
+| Instrução | Opcode | Formato Binário | Operação Interna | Observações |
+|------------|---------|------------------|------------------|--------------|
+| `NOP` | `0000` | `0000 0000 0000 0000` | Nenhuma operação | Deve obrigatoriamente ser `0x0000` |
+| `LD` | `0001` | `0001 dddd cccccccc` | `Rd = cte` | Carregamento imediato de constante |
+| `MOV_A` | `0010` | `0010 0000 ssss 0000` | `A = Rs` | Move registrador para o acumulador |
+| `MOV_R` | `0011` | `0011 dddd 0000 0000` | `Rd = A` | Move acumulador para registrador |
+| `ADD` | `0100` | `0100 0000 ssss 0000` | `A = A + Rs` | Soma entre acumulador e registrador |
+| `ADDI` | `0101` | `0101 0000 cccccccc` | `A = A + cte` | Soma imediata |
+| `SUB` | `0110` | `0110 0000 ssss 0000` | `A = A - Rs` | Subtração entre acumulador e registrador |
+| `CMPR` | `0111` | `0111 0000 ssss 0000` | `Flags = A - Rs` | Comparação entre acumulador e registrador |
+| `JMP` | `1000` | `1000 0000 aaaaaaaa` | `PC = addr` | Salto incondicional |
+
+---
+
+# Convenções Utilizadas
+
+- `A` → Acumulador
+- `Rd` → Registrador de destino
+- `Rs` → Registrador fonte
+- `cte` → Constante imediata de 8 bits
+- `addr` → Endereço de memória de 8 bits
+- `PC` → Program Counter
+
+---
+
+# Observações Gerais
+
+- Todas as instruções possuem tamanho fixo de **16 bits**.
+- O acumulador (`A`) é utilizado como operando principal nas operações aritméticas.
+- As instruções do tipo imediato utilizam os 8 bits menos significativos para constantes.
+- O opcode ocupa sempre os 4 bits mais significativos da instrução.

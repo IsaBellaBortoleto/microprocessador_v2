@@ -1,0 +1,33 @@
+-- Programa de Teste (Nícolas e Isabela)
+-- Opcodes: LD(1), MOV_A(2), MOV_R(3), ADD(4), ADDI(5), SUB(6), CMPR(7), JMP(8)
+-- Saltos são relativos: PC = PC + constante (em complemento de 2)
+
+Endereço | Instrução   | Comentário
+---------|-------------|------------------------------------------------
+         |             | -- [A] Carrega R3 com 5
+00       | LD R3, 5    | R3 = 5
+         |             | -- [B] Carrega R4 com 8
+01       | LD R4, 8    | R4 = 8
+         |             | -- [C] Soma R3 + R4 e guarda em R5
+02       | MOV_A R3    | Acumulador = R3
+03       | ADD R4      | Acumulador = Acumulador + R4
+04       | MOV_R R5    | R5 = Acumulador (R5 recebe a soma)
+         |             | -- [D] Subtrai 1 de R5 (Restrição: sem cte)
+05       | LD R1, 1    | R1 = 1 (Registrador auxiliar)
+06       | MOV_A R5    | Acumulador = R5
+07       | SUB R1      | Acumulador = Acumulador - R1
+08       | MOV_R R5    | R5 = Acumulador
+         |             | -- [E] Salta para o endereço 20
+09       | JMP +11     | PC = 9 + 11 = 20 (11 em binário: 0x0B)
+         |             | -- [F] Zera R5 (Nunca será executada)
+10       | LD R5, 0    | R5 = 0
+         |             |
+11 a 19  | NOP         | Zeros
+         |             |
+         |             | -- [G] No end. 20, copia R5 para R3
+20       | MOV_A R5    | Acumulador = R5
+21       | MOV_R R3    | R3 = Acumulador
+         |             | -- [H] Salta para o passo C (que está no endereço 2)
+22       | JMP -20     | PC = 22 - 20 = 2 (-20 em compl. de 2: 0xEC)
+         |             | -- [I] Zera R3 (Nunca será executada)
+23       | LD R3, 0    | R3 = 0
