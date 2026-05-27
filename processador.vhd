@@ -76,19 +76,25 @@ ARCHITECTURE a_processador OF processador IS
 
     COMPONENT un_control
         PORT (
-            clk : IN STD_LOGIC;
-            rst : IN STD_LOGIC;
-            ir_in : IN unsigned(15 DOWNTO 0);
-            wr_en_pc : OUT STD_LOGIC;
-            wr_en_ir : OUT STD_LOGIC;
+            clk         : IN STD_LOGIC;
+            rst         : IN STD_LOGIC;
+            ir_in       : IN unsigned(15 DOWNTO 0);
+            
+            -- Novas entradas de flags
+            flag_z      : IN STD_LOGIC;
+            flag_c      : IN STD_LOGIC;
+            flag_v      : IN STD_LOGIC;
+            
+            wr_en_pc    : OUT STD_LOGIC;
+            wr_en_ir    : OUT STD_LOGIC;
             wr_en_banco : OUT STD_LOGIC;
-            wr_en_acc : OUT STD_LOGIC;
-            sel_imm : OUT STD_LOGIC;
-            sel_mov_a : OUT STD_LOGIC;
-            sel_ld : OUT STD_LOGIC;
-            in_seletor : OUT unsigned(1 DOWNTO 0);
-            jump_en : OUT STD_LOGIC;
-            estado_out : OUT unsigned(1 DOWNTO 0)
+            wr_en_acc   : OUT STD_LOGIC;
+            sel_imm     : OUT STD_LOGIC;
+            sel_mov_a   : OUT STD_LOGIC;
+            sel_ld      : OUT STD_LOGIC;
+            in_seletor  : OUT unsigned(1 DOWNTO 0);
+            jump_en     : OUT STD_LOGIC;
+            estado_out  : OUT unsigned(1 DOWNTO 0)
         );
     END COMPONENT;
 
@@ -187,19 +193,25 @@ BEGIN
     );
 
     inst_uc : un_control PORT MAP(
-        clk => clk,
-        rst => rst,
-        ir_in => fio_ir_out,
-        wr_en_pc => fio_wr_en_pc,
-        wr_en_ir => fio_wr_en_ir,
+        clk         => clk,
+        rst         => rst,
+        ir_in       => fio_ir_out,
+        
+        -- Conectando os fios das flags na UC
+        flag_z      => fio_flag_z,
+        flag_c      => fio_flag_c,
+        flag_v      => fio_flag_v,
+        
+        wr_en_pc    => fio_wr_en_pc,
+        wr_en_ir    => fio_wr_en_ir,
         wr_en_banco => fio_wr_en_banco,
-        wr_en_acc => fio_wr_en_acc,
-        sel_imm => fio_sel_imm,
-        sel_ld => fio_sel_ld,
-        sel_mov_a => fio_sel_mov_a,
-        in_seletor => fio_in_seletor,
-        jump_en => fio_jump_en,
-        estado_out => estado_out
+        wr_en_acc   => fio_wr_en_acc,
+        sel_imm     => fio_sel_imm,
+        sel_ld      => fio_sel_ld,
+        sel_mov_a   => fio_sel_mov_a,
+        in_seletor  => fio_in_seletor,
+        jump_en     => fio_jump_en,
+        estado_out  => estado_out
     );
 
     inst_ula : ula PORT MAP(

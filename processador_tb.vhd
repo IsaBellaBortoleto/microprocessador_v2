@@ -64,8 +64,8 @@ BEGIN
         
         rst <= '0'; -- Libera o processador para rodar
         
-        -- Deixa simular por bastante tempo para vermos o loop do R5 várias vezes
-        WAIT FOR 3000 ns;
+        -- Aumentado para dar tempo de rodar todas as 29 repetições do loop
+        WAIT FOR 8000 ns; 
         
         -- Encerra a simulação automaticamente
         WAIT;
