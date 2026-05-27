@@ -78,12 +78,12 @@ END ENTITY;
 ARCHITECTURE a_reg16bits OF reg16bits IS
     SIGNAL registro : unsigned(15 DOWNTO 0);
 BEGIN
-    PROCESS (clk, rst, wr_en) -- acionado se houver mudança em clk, rst ou wr_en
+    PROCESS (clk, rst) -- Apenas clk e rst permitidos aqui
     BEGIN
         IF rst = '1' THEN
             registro <= "0000000000000000";
-        ELSIF wr_en = '1' THEN
-            IF rising_edge(clk) THEN
+        ELSIF rising_edge(clk) THEN
+            IF wr_en = '1' THEN
                 registro <= data_in;
             END IF;
         END IF;

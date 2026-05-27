@@ -19,15 +19,16 @@ END ENTITY;
 ARCHITECTURE a_pc OF pc IS
     SIGNAL registro : unsigned(6 DOWNTO 0);
 BEGIN
-    PROCESS (clk, rst, wr_en) -- acionado se houver mudança em clk, rst ou wr_en
+    PROCESS (clk, rst) -- Removido wr_en da lista
     BEGIN
         IF rst = '1' THEN
             registro <= "0000000";
-        ELSIF wr_en = '1' THEN
-            IF falling_edge(clk) THEN
+        ELSIF falling_edge(clk) THEN -- Borda de descida obrigatoriamente aqui fora
+            IF wr_en = '1' THEN      -- O enable fica DENTRO do if do clock
                 registro <= data_in;
             END IF;
         END IF;
     END PROCESS;
+    
     data_out <= registro; -- conexao direta, fora do processo
 END ARCHITECTURE;

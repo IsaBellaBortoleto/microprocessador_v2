@@ -13,7 +13,12 @@ ENTITY processador IS
         ir_out     : OUT unsigned(15 DOWNTO 0);
         ula_out    : OUT unsigned(15 DOWNTO 0);
         acc_out    : OUT unsigned(15 DOWNTO 0);
-        banco_out  : OUT unsigned(15 DOWNTO 0)
+        banco_out  : OUT unsigned(15 DOWNTO 0);
+
+        -- Flags registradas (Lab 6) — sorteio BHI (C=1,Z=0) e BVS (V=1)
+        flag_c_out : OUT STD_LOGIC;
+        flag_z_out : OUT STD_LOGIC;
+        flag_v_out : OUT STD_LOGIC
     );
 END ENTITY;
 
@@ -76,25 +81,35 @@ ARCHITECTURE a_processador OF processador IS
 
     COMPONENT un_control
         PORT (
-            clk         : IN STD_LOGIC;
-            rst         : IN STD_LOGIC;
-            ir_in       : IN unsigned(15 DOWNTO 0);
-            
-            -- Novas entradas de flags
-            flag_z      : IN STD_LOGIC;
-            flag_c      : IN STD_LOGIC;
-            flag_v      : IN STD_LOGIC;
-            
-            wr_en_pc    : OUT STD_LOGIC;
-            wr_en_ir    : OUT STD_LOGIC;
-            wr_en_banco : OUT STD_LOGIC;
-            wr_en_acc   : OUT STD_LOGIC;
-            sel_imm     : OUT STD_LOGIC;
-            sel_mov_a   : OUT STD_LOGIC;
-            sel_ld      : OUT STD_LOGIC;
-            in_seletor  : OUT unsigned(1 DOWNTO 0);
-            jump_en     : OUT STD_LOGIC;
-            estado_out  : OUT unsigned(1 DOWNTO 0)
+            clk           : IN STD_LOGIC;
+            rst           : IN STD_LOGIC;
+            ir_in         : IN unsigned(15 DOWNTO 0);
+            -- Flags registradas alimentam a UC para decisão dos branches
+            flag_z        : IN STD_LOGIC;
+            flag_c        : IN STD_LOGIC;
+            flag_v        : IN STD_LOGIC;
+            wr_en_pc      : OUT STD_LOGIC;
+            wr_en_ir      : OUT STD_LOGIC;
+            wr_en_banco   : OUT STD_LOGIC;
+            wr_en_acc     : OUT STD_LOGIC;
+            sel_imm       : OUT STD_LOGIC;
+            sel_ld        : OUT STD_LOGIC;
+            sel_mov_a     : OUT STD_LOGIC;
+            in_seletor    : OUT unsigned(1 DOWNTO 0);
+            jump_rel_en   : OUT STD_LOGIC;  -- JMP incondicional relativo
+            branch_abs_en : OUT STD_LOGIC;  -- BHI/BVS condicional absoluto
+            wr_en_flags   : OUT STD_LOGIC;
+            estado_out    : OUT unsigned(1 DOWNTO 0)
+        );
+    END COMPONENT;
+
+    COMPONENT reg1bit
+        PORT (
+            clk      : IN STD_LOGIC;
+            rst      : IN STD_LOGIC;
+            wr_en    : IN STD_LOGIC;
+            data_in  : IN STD_LOGIC;
+            data_out : OUT STD_LOGIC
         );
     END COMPONENT;
 
@@ -125,12 +140,19 @@ ARCHITECTURE a_processador OF processador IS
     SIGNAL fio_sel_imm     : STD_LOGIC;
     SIGNAL fio_sel_ld      : STD_LOGIC;
     SIGNAL fio_in_seletor  : unsigned(1 DOWNTO 0);
-    SIGNAL fio_jump_en     : STD_LOGIC;
+    SIGNAL fio_jump_rel_en   : STD_LOGIC;  -- JMP incondicional relativo
+    SIGNAL fio_branch_abs_en : STD_LOGIC;  -- BHI/BVS condicional absoluto
     SIGNAL fio_sel_mov_a   : STD_LOGIC;
     SIGNAL fio_in_data_acc : unsigned(15 DOWNTO 0);
 
     -- Flags
     SIGNAL fio_flag_z, fio_flag_c, fio_flag_v : STD_LOGIC;
+
+    -- Sinais de controle e saída dos flip-flops das flags (Lab 6)
+    SIGNAL fio_wr_en_flags : STD_LOGIC;
+    SIGNAL fio_flag_c_reg  : STD_LOGIC;
+    SIGNAL fio_flag_z_reg  : STD_LOGIC;
+    SIGNAL fio_flag_v_reg  : STD_LOGIC;
 
 BEGIN
     -- =======================================================
@@ -142,8 +164,11 @@ BEGIN
     read_sel  <= fio_ir_out(7 DOWNTO 4);  -- Fonte
     cte_ext   <= "00000000" & fio_ir_out(7 DOWNTO 0); -- Constante com zero-extend
     
-    -- MUX do PC (Absoluto)
-    fio_pc_in <= unsigned(fio_ir_out(6 DOWNTO 0)) WHEN fio_jump_en = '1' ELSE
+    -- MUX do PC — sorteio: incondicional RELATIVO, condicional ABSOLUTO
+    -- JMP (1000): PC = PC + delta (complemento de 2 em ir[6:0])
+    -- BHI (1001) / BVS (1010): PC = ir[6:0] direto (endereço absoluto)
+    fio_pc_in <= (fio_pc_out + fio_ir_out(6 DOWNTO 0)) WHEN fio_jump_rel_en = '1' ELSE
+                 fio_ir_out(6 DOWNTO 0)                WHEN fio_branch_abs_en = '1' ELSE
                  fio_pc_out + 1;
 
     -- MUX da entrada B da ULA (ADDI x ADD)
@@ -193,25 +218,25 @@ BEGIN
     );
 
     inst_uc : un_control PORT MAP(
-        clk         => clk,
-        rst         => rst,
-        ir_in       => fio_ir_out,
-        
-        -- Conectando os fios das flags na UC
-        flag_z      => fio_flag_z,
-        flag_c      => fio_flag_c,
-        flag_v      => fio_flag_v,
-        
-        wr_en_pc    => fio_wr_en_pc,
-        wr_en_ir    => fio_wr_en_ir,
-        wr_en_banco => fio_wr_en_banco,
-        wr_en_acc   => fio_wr_en_acc,
-        sel_imm     => fio_sel_imm,
-        sel_ld      => fio_sel_ld,
-        sel_mov_a   => fio_sel_mov_a,
-        in_seletor  => fio_in_seletor,
-        jump_en     => fio_jump_en,
-        estado_out  => estado_out
+        clk           => clk,
+        rst           => rst,
+        ir_in         => fio_ir_out,
+        -- Flags registradas: a UC consulta o valor TRAVADO do ciclo anterior
+        flag_z        => fio_flag_z_reg,
+        flag_c        => fio_flag_c_reg,
+        flag_v        => fio_flag_v_reg,
+        wr_en_pc      => fio_wr_en_pc,
+        wr_en_ir      => fio_wr_en_ir,
+        wr_en_banco   => fio_wr_en_banco,
+        wr_en_acc     => fio_wr_en_acc,
+        sel_imm       => fio_sel_imm,
+        sel_ld        => fio_sel_ld,
+        sel_mov_a     => fio_sel_mov_a,
+        in_seletor    => fio_in_seletor,
+        jump_rel_en   => fio_jump_rel_en,
+        branch_abs_en => fio_branch_abs_en,
+        wr_en_flags   => fio_wr_en_flags,
+        estado_out    => estado_out
     );
 
     inst_ula : ula PORT MAP(
@@ -241,5 +266,41 @@ BEGIN
         data_in => fio_in_data_acc,
         data_out => fio_out_acc
     );
+
+    -- =======================================================
+    -- 5. FLIP-FLOPS DAS FLAGS (Lab 6)
+    -- Instâncias de reg1bit — fora da ULA, no top-level.
+    -- wr_en_flags ativo apenas em ADD, ADDI, SUB, CMPR (estado Execute).
+    -- LD, MOV, JMP, BHI, BVS e NOP NÃO atualizam as flags.
+    -- =======================================================
+
+    inst_flag_c : reg1bit PORT MAP(
+        clk      => clk,
+        rst      => rst,
+        wr_en    => fio_wr_en_flags,
+        data_in  => fio_flag_c,
+        data_out => fio_flag_c_reg
+    );
+
+    inst_flag_z : reg1bit PORT MAP(
+        clk      => clk,
+        rst      => rst,
+        wr_en    => fio_wr_en_flags,
+        data_in  => fio_flag_z,
+        data_out => fio_flag_z_reg
+    );
+
+    inst_flag_v : reg1bit PORT MAP(
+        clk      => clk,
+        rst      => rst,
+        wr_en    => fio_wr_en_flags,
+        data_in  => fio_flag_v,
+        data_out => fio_flag_v_reg
+    );
+
+    -- Conexão das flags registradas nos pinos observáveis
+    flag_c_out <= fio_flag_c_reg;
+    flag_z_out <= fio_flag_z_reg;
+    flag_v_out <= fio_flag_v_reg;
 
 END ARCHITECTURE;

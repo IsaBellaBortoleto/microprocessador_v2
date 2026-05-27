@@ -56,12 +56,12 @@ BEGIN
         WAIT;
     END PROCESS clk_proc;
 
-    -- No gtkwave, verificar:
-    -- Após reset: pc_out = x"00" (bin: 0000000), rom_out = x"0002" (bin: 0000000000000010)
-    -- Clock 1:   pc_out = x"01" (bin: 0000001), rom_out = x"0800" (bin: 0000100000000000)
-    -- Clock 2:   pc_out = x"02" (bin: 0000010), rom_out = x"0000" (bin: 0000000000000000)
-    -- Clock 3:   pc_out = x"03" (bin: 0000011), rom_out = x"0000" (bin: 0000000000000000)
-    -- Clock 4:   pc_out = x"04" (bin: 0000100), rom_out = x"0800" (bin: 0000100000000000)
-    -- Clock 5:   pc_out = x"05" (bin: 0000101), rom_out = x"0002" (bin: 0000000000000010)
-    -- A partir do endereço 11: rom_out = x"0000" (endereços vazios)
+    -- No gtkwave, verificar (ROM do Lab 6):
+    -- Após reset: pc_out = x"00", rom_out = x"111E" (LD R1, 30)
+    -- Clock 1:   pc_out = x"01", rom_out = x"1300" (LD R3, 0)
+    -- Clock 2:   pc_out = x"02", rom_out = x"1400" (LD R4, 0)
+    -- Clock 3:   pc_out = x"03", rom_out = x"2040" (MOV_A R4)
+    -- Clock 4:   pc_out = x"04", rom_out = x"4030" (ADD R3)
+    -- Clock 5:   pc_out = x"05", rom_out = x"3400" (MOV_R R4)
+    -- A partir do endereço 15: rom_out = x"0000" (endereços vazios)
 END ARCHITECTURE;

@@ -17,7 +17,12 @@ ARCHITECTURE sim OF processador_tb IS
             ir_out     : OUT unsigned(15 DOWNTO 0);
             ula_out    : OUT unsigned(15 DOWNTO 0);
             acc_out    : OUT unsigned(15 DOWNTO 0);
-            banco_out  : OUT unsigned(15 DOWNTO 0)
+            banco_out  : OUT unsigned(15 DOWNTO 0);
+            
+            -- Pinos das flags adicionados para o Lab 6
+            flag_c_out : OUT STD_LOGIC;
+            flag_z_out : OUT STD_LOGIC;
+            flag_v_out : OUT STD_LOGIC
         );
     END COMPONENT;
 
@@ -30,6 +35,11 @@ ARCHITECTURE sim OF processador_tb IS
     SIGNAL ula_out    : unsigned(15 DOWNTO 0);
     SIGNAL acc_out    : unsigned(15 DOWNTO 0);
     SIGNAL banco_out  : unsigned(15 DOWNTO 0);
+    
+    -- Sinais das flags
+    SIGNAL flag_c_out : STD_LOGIC;
+    SIGNAL flag_z_out : STD_LOGIC;
+    SIGNAL flag_v_out : STD_LOGIC;
 
     -- Período do clock
     CONSTANT clk_period : TIME := 10 ns;
@@ -44,7 +54,12 @@ BEGIN
         ir_out => ir_out,
         ula_out => ula_out,
         acc_out => acc_out,
-        banco_out => banco_out
+        banco_out => banco_out,
+        
+        -- Mapeamento das flags
+        flag_c_out => flag_c_out,
+        flag_z_out => flag_z_out,
+        flag_v_out => flag_v_out
     );
 
     -- Geração do Clock
@@ -64,8 +79,8 @@ BEGIN
         
         rst <= '0'; -- Libera o processador para rodar
         
-        -- Aumentado para dar tempo de rodar todas as 29 repetições do loop
-        WAIT FOR 8000 ns; 
+        -- Aumentado para dar tempo de rodar todas as repetições do loop
+        WAIT FOR 12000 ns; 
         
         -- Encerra a simulação automaticamente
         WAIT;

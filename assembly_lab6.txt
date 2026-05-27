@@ -1,0 +1,54 @@
+-- Programa de Teste — Lab 6 (Nícolas e Isabela)
+-- Opcodes: LD(1), MOV_A(2), MOV_R(3), ADD(4), ADDI(5), SUB(6), CMPR(7),
+--          JMP(8, relativo), BHI(9, absoluto), BVS(A, absoluto)
+-- JMP incondicional: PC = PC + delta  (delta em complemento de 2, 8 bits)
+-- BHI condicional:   PC = addr        (se C=1 e Z=0, unsigned higher)
+
+Endereço | Instrução    | Codificação Binária      | Hex    | Comentário
+---------|--------------|--------------------------|--------|--------------------------------------------
+         |              |                          |        | -- Pré-carga: coloca o limite (30) em R1
+00       | LD R1, 30    | 0001 0001 0001 1110       | 0x111E | R1 = 30  (usado para a comparação do loop)
+         |              |                          |        |
+         |              |                          |        | -- [A] Carrega R3 (contador) com 0
+01       | LD R3, 0     | 0001 0011 0000 0000       | 0x1300 | R3 = 0
+         |              |                          |        | -- [B] Carrega R4 (acumulador da soma) com 0
+02       | LD R4, 0     | 0001 0100 0000 0000       | 0x1400 | R4 = 0
+         |              |                          |        |
+         |              |                          |        | -- [C] Soma R3 com R4 e guarda em R4
+         |              |                          |        |    (R4 = R4 + R3)
+03       | MOV_A R4     | 0010 0000 0100 0000       | 0x2040 | A = R4
+04       | ADD R3       | 0100 0000 0011 0000       | 0x4030 | A = A + R3
+05       | MOV_R R4     | 0011 0100 0000 0000       | 0x3400 | R4 = A
+         |              |                          |        |
+         |              |                          |        | -- [D] Soma 1 em R3  (R3 = R3 + 1)
+06       | MOV_A R3     | 0010 0000 0011 0000       | 0x2030 | A = R3
+07       | ADDI 1       | 0101 0000 0000 0001       | 0x5001 | A = A + 1
+08       | MOV_R R3     | 0011 0011 0000 0000       | 0x3300 | R3 = A
+         |              |                          |        |
+         |              |                          |        | -- [E] Se R3 < 30, salta para o passo C
+         |              |                          |        |    Estratégia: calcula (R1 - R3) = (30 - R3).
+         |              |                          |        |    Se 30 > R3 → C=1 e Z=0 → BHI dispara.
+09       | MOV_A R1     | 0010 0000 0001 0000       | 0x2010 | A = R1 (= 30)
+10       | CMPR R3      | 0111 0000 0011 0000       | 0x7030 | flags = A - R3  (não salva resultado)
+11       | BHI 3        | 1001 0000 0000 0011       | 0x9003 | se C=1 e Z=0: PC = 3  (volta ao passo C)
+         |              |                          |        |
+         |              |                          |        | -- [F] Copia R4 para R5 (fim do loop)
+12       | MOV_A R4     | 0010 0000 0100 0000       | 0x2040 | A = R4
+13       | MOV_R R5     | 0011 0101 0000 0000       | 0x3500 | R5 = A
+         |              |                          |        |
+         |              |                          |        | -- Fim: loop infinito no endereço 14
+         |              |                          |        |    JMP relativo com delta=0: PC = 14+0 = 14
+14       | JMP 0        | 1000 0000 0000 0000       | 0x8000 | PC = PC + 0  (trava aqui)
+
+-- ==========================================================================
+-- Rastreamento da execução (verificação):
+-- Cada iteração: R3 incrementa (+1), R4 acumula (+R3 antes do incremento).
+-- Iteração 1:  A=R4+R3=0+0=0  → R4=0,  R3=1
+-- Iteração 2:  A=0+1=1        → R4=1,  R3=2
+-- Iteração 3:  A=1+2=3        → R4=3,  R3=3
+-- Iteração 4:  A=3+3=6        → R4=6,  R3=4
+-- ...
+-- O loop executa enquanto R3 < 30 (30 iterações no total).
+-- Ao final: R3=30, R4=0+0+1+2+...+29 = 435 = 0x01B3
+-- R5 = R4 = 435 = 0x01B3
+-- ==========================================================================
