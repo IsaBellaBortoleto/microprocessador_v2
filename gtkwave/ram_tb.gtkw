@@ -1,0 +1,24 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Mon Jun 01 19:22:43 2026
+[*]
+[dumpfile] "D:\Bella\UTFPR\5_periodo\github\microprocessador_v2\gtkwave\ram_tb.vcd"
+[savefile] "D:\Bella\UTFPR\5_periodo\github\microprocessador_v2\gtkwave\ram_tb.gtkw"
+[timestart] 0
+[size] 1920 1009
+[pos] 1885 -35
+*-27.048355 389300000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 239
+[signals_width] 188
+[sst_expanded] 1
+[sst_vpaned_height] 298
+@28
+ram_tb.clk
+@22
+ram_tb.dado_in[15:0]
+ram_tb.dado_out[15:0]
+ram_tb.endereco[6:0]
+@28
+ram_tb.wr_en
+[pattern_trace] 1
+[pattern_trace] 0

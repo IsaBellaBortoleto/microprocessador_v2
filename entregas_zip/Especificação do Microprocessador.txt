@@ -20,3 +20,12 @@ Seguem as características sorteadas para o BANCO DE REGISTRADORES (e conexão c
 Seguem as características sorteadas para a UNIDADE LÓGICO-ARITMÉTICA do processador da sua equipe. Elas incluem os seguintes saltos condicionais (que exigem certas flags da ULA).
 
 {'Saltos condicionais': ['BHI', 'BVS']}
+
+
+Seguem as características sorteadas para a VALIDAÇÃO do processador da sua equipe. Vocês deverão implementar dois dos três itens sorteados abaixo, à sua escolha. Consulte o PDF do sorteio para esclarecimentos.
+
+Customização da validação (final do loop e/ou complicação):
+['Indicar, ao final, no bit debug, se 899 é primo ou não',
+ 'CLZ igual a (n-5) (count leading zeroes)',
+ 'Colocar no bus debug um divisor de 899']
+

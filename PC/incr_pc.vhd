@@ -11,7 +11,7 @@ ENTITY incr_pc IS
     PORT (
         clk : IN STD_LOGIC;
         rst : IN STD_LOGIC;
-
+        wr_en_pc : IN STD_LOGIC;
         pc_out : OUT unsigned(6 DOWNTO 0)
     );
 END;
@@ -35,7 +35,7 @@ BEGIN
     utt_pc : pc PORT MAP(
         clk => clk,
         rst => rst,
-        wr_en => '1', --"Por enquanto pode deixar wr_en=1 sempre, então todo clock vai incrementar"
+        wr_en => wr_en_pc,
         data_in => fio_pc_in,
         data_out => fio_pc_out
     );
