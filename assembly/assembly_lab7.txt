@@ -1,0 +1,67 @@
+-- FASE 1: carrega dados variados
+00: LD R1, 0xAB    -- dado 1 = 171
+01: LD R2, 0x37    -- dado 2 = 55
+02: LD R3, 0xC4    -- dado 3 = 196
+03: LD R4, 0x5E    -- dado 4 = 94
+
+-- FASE 2: carrega endereços espaçados
+04: LD R5, 5       -- ponteiro para endereço 5
+05: LD R6, 15      -- ponteiro para endereço 15
+06: LD R7, 30      -- ponteiro para endereço 30
+07: LD R8, 60      -- ponteiro para endereço 60
+
+-- FASE 3: escritas SW (acumulador → RAM[Rs])
+08: MOV_A R1       -- A = 0xAB
+09: SW R1, (R5)    -- RAM[5]  = 0xAB
+10: MOV_A R2       -- A = 0x37
+11: SW R2, (R6)    -- RAM[15] = 0x37
+12: MOV_A R3       -- A = 0xC4
+13: SW R3, (R7)    -- RAM[30] = 0xC4
+14: MOV_A R4       -- A = 0x5E
+15: SW R4, (R8)    -- RAM[60] = 0x5E
+
+-- FASE 4: limpeza (NOPs para garantir que barramentos estabilizam)
+16: NOP
+17: NOP
+18: NOP
+
+-- FASE 5: leituras LW (RAM[Rs] → Rd)
+19: LW R9,  (R5)   -- R9  = RAM[5]  (esperado: 0xAB)
+20: LW R10, (R6)   -- R10 = RAM[15] (esperado: 0x37)
+21: LW R11, (R7)   -- R11 = RAM[30] (esperado: 0xC4)
+22: LW R12, (R8)   -- R12 = RAM[60] (esperado: 0x5E)
+
+-- FIM: loop infinito
+23: JMP -1         -- trava em 23
+
+
+Formato SW: 1100 0000 ssss 0000  (acumulador → RAM[Rs])
+Formato LW: 1011 dddd ssss 0000  (RAM[Rs] → Rd)
+
+
+End | Assembly        | Binário              | Hex    | Comentário
+----|-----------------|----------------------|--------|---------------------------
+ 00 | LD R1, 0xAB     | 0001 0001 1010 1011  | 0x11AB | R1 = 171
+ 01 | LD R2, 0x37     | 0001 0010 0011 0111  | 0x1237 | R2 = 55
+ 02 | LD R3, 0xC4     | 0001 0011 1100 0100  | 0x13C4 | R3 = 196
+ 03 | LD R4, 0x5E     | 0001 0100 0101 1110  | 0x145E | R4 = 94
+ 04 | LD R5, 5        | 0001 0101 0000 0101  | 0x1505 | ponteiro endereço 5
+ 05 | LD R6, 15       | 0001 0110 0000 1111  | 0x160F | ponteiro endereço 15
+ 06 | LD R7, 30       | 0001 0111 0001 1110  | 0x171E | ponteiro endereço 30
+ 07 | LD R8, 60       | 0001 1000 0011 1100  | 0x183C | ponteiro endereço 60
+ 08 | MOV_A R1        | 0010 0000 0001 0000  | 0x2010 | A = R1 = 0xAB
+ 09 | SW (R5)         | 1100 0000 0101 0000  | 0xC050 | RAM[5]  = 0xAB
+ 10 | MOV_A R2        | 0010 0000 0010 0000  | 0x2020 | A = R2 = 0x37
+ 11 | SW (R6)         | 1100 0000 0110 0000  | 0xC060 | RAM[15] = 0x37
+ 12 | MOV_A R3        | 0010 0000 0011 0000  | 0x2030 | A = R3 = 0xC4
+ 13 | SW (R7)         | 1100 0000 0111 0000  | 0xC070 | RAM[30] = 0xC4
+ 14 | MOV_A R4        | 0010 0000 0100 0000  | 0x2040 | A = R4 = 0x5E
+ 15 | SW (R8)         | 1100 0000 1000 0000  | 0xC080 | RAM[60] = 0x5E
+ 16 | NOP             | 0000 0000 0000 0000  | 0x0000 | limpeza
+ 17 | NOP             | 0000 0000 0000 0000  | 0x0000 | limpeza
+ 18 | NOP             | 0000 0000 0000 0000  | 0x0000 | limpeza
+ 19 | LW R9,  (R5)    | 1011 1001 0101 0000  | 0xB950 | R9  = RAM[5]  → 0xAB?
+ 20 | LW R10, (R6)    | 1011 1010 0110 0000  | 0xBA60 | R10 = RAM[15] → 0x37?
+ 21 | LW R11, (R7)    | 1011 1011 0111 0000  | 0xBB70 | R11 = RAM[30] → 0xC4?
+ 22 | LW R12, (R8)    | 1011 1100 1000 0000  | 0xBC80 | R12 = RAM[60] → 0x5E?
+ 23 | JMP -1          | 1000 0000 1111 1111  | 0x80FF | trava em 23
