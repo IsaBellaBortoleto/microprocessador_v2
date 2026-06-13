@@ -13,52 +13,79 @@ END ENTITY;
 ARCHITECTURE a_rom OF rom IS
     TYPE mem IS ARRAY (0 TO 127) OF unsigned(15 DOWNTO 0);
     CONSTANT conteudo_rom : mem := (
-
         -- =====================================================
-        -- PROGRAMA DE TESTE — Lab 7 (RAM: LW e SW)
-        -- Opcodes novos: LW=1011, SW=1100
-        -- Formato SW: 1100 0000 ssss 0000 (A → RAM[Rs])
-        -- Formato LW: 1011 dddd ssss 0000 (RAM[Rs] → Rd)
+        -- PROGRAMA — Lab 8 Validação **(Crivo de Eratóstenes)**
+        -- Elimina não-primos até 32 na RAM
+        -- RAM[n] = n → primo | RAM[n] = 0 → não primo
         -- =====================================================
 
-        -- FASE 1: carrega dados variados em registradores diferentes
-        0 => "0001000110101011", -- LD R1, 0xAB  (171) — dado 1
-        1 => "0001001000110111", -- LD R2, 0x37  (55)  — dado 2
-        2 => "0001001111000100", -- LD R3, 0xC4  (196) — dado 3
-        3 => "0001010001011110", -- LD R4, 0x5E  (94)  — dado 4
-
-        -- FASE 2: carrega ponteiros de endereço espaçados
-        4 => "0001010100000101", -- LD R5, 5    — ponteiro endereço 5
-        5 => "0001011000001111", -- LD R6, 15   — ponteiro endereço 15
-        6 => "0001011100011110", -- LD R7, 30   — ponteiro endereço 30
-        7 => "0001100000111100", -- LD R8, 60   — ponteiro endereço 60
-
-        -- FASE 3: escritas SW — acumulador → RAM[ponteiro]
-        -- Nenhuma leitura entre as escritas (regra do professor)
-        8 => "0010000000010000", -- MOV_A R1    — A = 0xAB
-        9 => "1100000001010000", -- SW (R5)     — RAM[5]  = 0xAB
-        10 => "0010000000100000", -- MOV_A R2    — A = 0x37
-        11 => "1100000001100000", -- SW (R6)     — RAM[15] = 0x37
-        12 => "0010000000110000", -- MOV_A R3    — A = 0xC4
-        13 => "1100000001110000", -- SW (R7)     — RAM[30] = 0xC4
-        14 => "0010000001000000", -- MOV_A R4    — A = 0x5E
-        15 => "1100000010000000", -- SW (R8)     — RAM[60] = 0x5E
-
-        -- FASE 4: NOPs para limpar barramentos antes das leituras
-        16 => "0000000000000000", -- NOP
-        17 => "0000000000000000", -- NOP
-        18 => "0000000000000000", -- NOP
-
-        -- FASE 5: leituras LW — RAM[ponteiro] → registrador destino
-        -- Registradores destino diferentes dos ponteiros e dos dados originais
-        19 => "1011100101010000", -- LW R9,  (R5) — R9  = RAM[5]  → esperado: 0xAB
-        20 => "1011101001100000", -- LW R10, (R6) — R10 = RAM[15] → esperado: 0x37
-        21 => "1011101101110000", -- LW R11, (R7) — R11 = RAM[30] → esperado: 0xC4
-        22 => "1011110010000000", -- LW R12, (R8) — R12 = RAM[60] → esperado: 0x5E
-
-        -- FIM: loop infinito em 23
-        -- JMP -1: PC=24 + (-1) = 23, delta=-1 → 11111111 em complemento de 2
-        23 => "1000000011111111", -- JMP -1
+        -- BLOCO 1: Preenche RAM[2..32] com RAM[n] = n
+        0 => "0001010000000010", -- LD  R4, 2     contador
+        1 => "0001010100100001", -- LD  R5, 33    limite
+        -- loop (endereço 2)
+        2 => "0010000001000000", -- MOV_A R4      A = contador
+        3 => "1100000001000000", -- SW (R4)       RAM[R4] = A
+        4 => "0010000001000000", -- MOV_A R4      A = R4
+        5 => "0101000000000001", -- ADDI 1        A = A + 1
+        6 => "0011010000000000", -- MOV_R R4      R4 = A
+        7 => "0010000001010000", -- MOV_A R5      A = 33
+        8 => "0111000001000000", -- CMPR R4       33 - R4
+        9 => "1001000000000010", -- BHI 2         se 33 > R4: volta
+        -----------------------------------------------------------------
+        -- BLOCO 2: Elimina múltiplos de 2 (RAM[4,6,8...32] = 0)
+        10 => "0001000100000100", -- LD  R1, 4     contador
+        11 => "0001011000000000", -- LD  R6, 0     zero
+        12 => "0001010100100001", -- LD  R5, 33    limite
+        -- loop (endereço 13)
+        13 => "0010000001100000", -- MOV_A R6      A = 0
+        14 => "1100000000010000", -- SW (R1)       RAM[R1] = 0
+        15 => "0010000000010000", -- MOV_A R1      A = contador
+        16 => "0101000000000010", -- ADDI 2        A = A + 2
+        17 => "0011000100000000", -- MOV_R R1      R1 = A
+        18 => "0010000001010000", -- MOV_A R5      A = 33
+        19 => "0111000000010000", -- CMPR R1       33 - R1
+        20 => "1001000000001101", -- BHI 13        se 33 > R1: volta
+        -----------------------------------------------------------------
+        -- BLOCO 3: Elimina múltiplos de 3 (RAM[6,9,12...30] = 0)
+        21 => "0001000100000110", -- LD  R1, 6     contador
+        -- (R5=33 e R6=0 já carregados)
+        -- loop (endereço 22)
+        22 => "0010000001100000", -- MOV_A R6      A = 0
+        23 => "1100000000010000", -- SW (R1)       RAM[R1] = 0
+        24 => "0010000000010000", -- MOV_A R1      A = contador
+        25 => "0101000000000011", -- ADDI 3        A = A + 3
+        26 => "0011000100000000", -- MOV_R R1      R1 = A
+        27 => "0010000001010000", -- MOV_A R5      A = 33
+        28 => "0111000000010000", -- CMPR R1       33 - R1
+        29 => "1001000000010110", -- BHI 22        se 33 > R1: volta
+        -----------------------------------------------------------------
+        -- BLOCO 4: Elimina múltiplos de 5 (RAM[10,15,20,25,30] = 0)
+        30 => "0001000100001010", -- LD  R1, 10    contador
+        -- loop (endereço 31)
+        31 => "0010000001100000", -- MOV_A R6      A = 0
+        32 => "1100000000010000", -- SW (R1)       RAM[R1] = 0
+        33 => "0010000000010000", -- MOV_A R1      A = contador
+        34 => "0101000000000101", -- ADDI 5        A = A + 5
+        35 => "0011000100000000", -- MOV_R R1      R1 = A
+        36 => "0010000001010000", -- MOV_A R5      A = 33
+        37 => "0111000000010000", -- CMPR R1       33 - R1
+        38 => "1001000000011111", -- BHI 31        se 33 > R1: volta
+        -----------------------------------------------------------------
+        -- BLOCO 5: Elimina múltiplos de 7 (RAM[14,21,28] = 0)
+        39 => "0001000100001110", -- LD  R1, 14    contador
+        -- loop (endereço 40)
+        40 => "0010000001100000", -- MOV_A R6      A = 0
+        41 => "1100000000010000", -- SW (R1)       RAM[R1] = 0
+        42 => "0010000000010000", -- MOV_A R1      A = contador
+        43 => "0101000000000111", -- ADDI 7        A = A + 7
+        44 => "0011000100000000", -- MOV_R R1      R1 = A
+        45 => "0010000001010000", -- MOV_A R5      A = 33
+        46 => "0111000000010000", -- CMPR R1       33 - R1
+        47 => "1001000000101000", -- BHI 40        se 33 > R1: volta
+        -----------------------------------------------------------------
+        
+        -- TODO: endereço 48 - PESSOA 2
+        -- (verificação de 899 + bus_debug + bit_debug)
 
         OTHERS => (OTHERS => '0')
     );

@@ -21,7 +21,11 @@ ENTITY processador IS
         flag_v_out : OUT STD_LOGIC;
         -- Pinos observáveis da RAM (Lab 7)
         ram_dado_out_obs : OUT unsigned(15 DOWNTO 0);
-        ram_endereco_obs : OUT unsigned(6 DOWNTO 0)
+        ram_endereco_obs : OUT unsigned(6 DOWNTO 0);
+
+        -- Lab 8
+        bus_debug : OUT unsigned(15 DOWNTO 0); -- resultado: divisor de 899 (esperado: 29)
+        bit_debug : OUT STD_LOGIC -- resultado: 899 é primo? (esperado: 0)
     );
 END ENTITY;
 
@@ -175,6 +179,12 @@ ARCHITECTURE a_processador OF processador IS
     SIGNAL fio_ram_dado_out : unsigned(15 DOWNTO 0);
     SIGNAL fio_sel_ram : STD_LOGIC;
 
+    -- crivo de Eratóstenes (Lab 8)
+    SIGNAL fio_bus_debug : unsigned(15 DOWNTO 0);
+    SIGNAL fio_bit_debug : STD_LOGIC;
+
+ 
+
 BEGIN
     -- =======================================================
     -- 3. DECODIFICAÇÃO DE FIOS E MULTIPLEXADORES
@@ -217,6 +227,16 @@ BEGIN
     -- Pinos observáveis da RAM para o GTKWave
     ram_dado_out_obs <= fio_ram_dado_out;
     ram_endereco_obs <= fio_ram_endereco;
+
+    -- Lab 8: sinais de debug para o GTKWave
+    bus_debug <= fio_bus_debug;
+    bit_debug <= fio_bit_debug;
+
+
+    -- TODO: pesssoa 2 - PLACEHOLDER até os registradores de resultado serem definidos
+    fio_bus_debug <= (OTHERS => '0'); -- será conectado ao registrador de resultado
+    fio_bit_debug <= '0'; -- será conectado ao registrador de primo/não primo
+
     -- =======================================================
     -- 4. INSTANCIAÇÕES (PLUGANDO OS COMPONENTES)
     -- =======================================================
@@ -233,6 +253,7 @@ BEGIN
         clk => clk,
         endereco => fio_pc_out,
         dado => fio_rom_out
+
     );
 
     inst_ir : reg16bits PORT MAP(

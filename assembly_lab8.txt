@@ -1,0 +1,197 @@
+; =====================================================
+; PROGRAMA — Lab 8 Validação (Crivo de Eratóstenes)
+; UTFPR — Arquitetura de Computadores
+; Autoras: Isabela Bella Bortoleto e Nícolas Auersvalt Marques
+;
+; Objetivo: encontrar todos os primos de 2 a 32 usando
+; o Crivo de Eratóstenes, armazenando os resultados na RAM.
+;
+; Convenção:
+;   RAM[n] = n → n é primo
+;   RAM[n] = 0 → n foi eliminado (não é primo)
+;
+; Instruções disponíveis:
+;   LD Rd, cte     → Rd = cte
+;   MOV_A Rs       → A = Rs
+;   MOV_R Rd       → Rd = A
+;   ADD Rs         → A = A + Rs
+;   ADDI cte       → A = A + cte
+;   SUB Rs         → A = A - Rs
+;   CMPR Rs        → flags = A - Rs (não salva resultado)
+;   SW (Rs)        → RAM[Rs] = A
+;   LW Rd, (Rs)    → Rd = RAM[Rs]
+;   JMP delta      → PC = PC + delta (relativo, compl. 2)
+;   BHI addr       → se C=1 e Z=0: PC = addr (absoluto)
+;   BVS addr       → se V=1: PC = addr (absoluto)
+;   NOP            → nenhuma operação
+;
+; Registradores utilizados:
+;   R1 → contador/ponteiro dos blocos 2 a 5
+;   R4 → contador do bloco 1
+;   R5 → limite (33) — reutilizado em todos os blocos
+;   R6 → zero (0)   — reutilizado em todos os blocos
+; =====================================================
+
+
+; =====================================================
+; BLOCO 1 — Preenche RAM[2..32] com RAM[n] = n
+; Endereços: 0 a 9
+; =====================================================
+
+; inicialização
+[end.  0] LD  R4, 2       ; R4 = 2  (contador começa em 2)
+[end.  1] LD  R5, 33      ; R5 = 33 (limite: loop para quando R4 >= 33)
+
+; loop_1 (início no endereço 2)
+[end.  2] MOV_A R4        ; A = R4  (dado a escrever = o próprio contador)
+[end.  3] SW (R4)         ; RAM[R4] = A  (ex: RAM[2]=2, RAM[3]=3...)
+[end.  4] MOV_A R4        ; A = R4
+[end.  5] ADDI 1          ; A = A + 1   (incrementa contador)
+[end.  6] MOV_R R4        ; R4 = A
+[end.  7] MOV_A R5        ; A = 33
+[end.  8] CMPR R4         ; flags = 33 - R4
+[end.  9] BHI 2           ; se 33 > R4 (C=1 e Z=0): volta para end. 2
+
+; ao sair do loop: RAM[2]=2, RAM[3]=3, ..., RAM[32]=32
+
+
+; =====================================================
+; BLOCO 2 — Elimina múltiplos de 2
+; RAM[4,6,8,10,12,14,16,18,20,22,24,26,28,30,32] = 0
+; Endereços: 10 a 20
+; =====================================================
+
+; inicialização
+[end. 10] LD  R1, 4       ; R1 = 4  (primeiro múltiplo de 2 após o 2)
+[end. 11] LD  R6, 0       ; R6 = 0  (dado a escrever — será reutilizado)
+[end. 12] LD  R5, 33      ; R5 = 33 (limite — reutilizado nos próximos blocos)
+
+; loop_2 (início no endereço 13)
+[end. 13] MOV_A R6        ; A = 0
+[end. 14] SW (R1)         ; RAM[R1] = 0  (elimina o múltiplo)
+[end. 15] MOV_A R1        ; A = R1
+[end. 16] ADDI 2          ; A = A + 2   (avança de 2 em 2)
+[end. 17] MOV_R R1        ; R1 = A
+[end. 18] MOV_A R5        ; A = 33
+[end. 19] CMPR R1         ; flags = 33 - R1
+[end. 20] BHI 13          ; se 33 > R1: volta para end. 13
+
+
+; =====================================================
+; BLOCO 3 — Elimina múltiplos de 3
+; RAM[6,9,12,15,18,21,24,27,30] = 0
+; Endereços: 21 a 29
+; Nota: R5=33 e R6=0 já estão carregados do Bloco 2
+; =====================================================
+
+; inicialização
+[end. 21] LD  R1, 6       ; R1 = 6  (primeiro múltiplo de 3 após o 3)
+
+; loop_3 (início no endereço 22)
+[end. 22] MOV_A R6        ; A = 0
+[end. 23] SW (R1)         ; RAM[R1] = 0
+[end. 24] MOV_A R1        ; A = R1
+[end. 25] ADDI 3          ; A = A + 3   (avança de 3 em 3)
+[end. 26] MOV_R R1        ; R1 = A
+[end. 27] MOV_A R5        ; A = 33
+[end. 28] CMPR R1         ; flags = 33 - R1
+[end. 29] BHI 22          ; se 33 > R1: volta para end. 22
+
+
+; =====================================================
+; BLOCO 4 — Elimina múltiplos de 5
+; RAM[10,15,20,25,30] = 0
+; Endereços: 30 a 38
+; Nota: R5=33 e R6=0 já estão carregados
+; =====================================================
+
+; inicialização
+[end. 30] LD  R1, 10      ; R1 = 10 (primeiro múltiplo de 5 após o 5)
+
+; loop_4 (início no endereço 31)
+[end. 31] MOV_A R6        ; A = 0
+[end. 32] SW (R1)         ; RAM[R1] = 0
+[end. 33] MOV_A R1        ; A = R1
+[end. 34] ADDI 5          ; A = A + 5   (avança de 5 em 5)
+[end. 35] MOV_R R1        ; R1 = A
+[end. 36] MOV_A R5        ; A = 33
+[end. 37] CMPR R1         ; flags = 33 - R1
+[end. 38] BHI 31          ; se 33 > R1: volta para end. 31
+
+
+; =====================================================
+; BLOCO 5 — Elimina múltiplos de 7
+; RAM[14,21,28] = 0
+; Endereços: 39 a 47
+; Nota: R5=33 e R6=0 já estão carregados
+; =====================================================
+
+; inicialização
+[end. 39] LD  R1, 14      ; R1 = 14 (primeiro múltiplo de 7 após o 7)
+
+; loop_5 (início no endereço 40)
+[end. 40] MOV_A R6        ; A = 0
+[end. 41] SW (R1)         ; RAM[R1] = 0
+[end. 42] MOV_A R1        ; A = R1
+[end. 43] ADDI 7          ; A = A + 7   (avança de 7 em 7)
+[end. 44] MOV_R R1        ; R1 = A
+[end. 45] MOV_A R5        ; A = 33
+[end. 46] CMPR R1         ; flags = 33 - R1
+[end. 47] BHI 40          ; se 33 > R1: volta para end. 40
+
+
+; =====================================================
+; BLOCO 6 — Verificação de 899 (Pessoa 2)
+; Endereços: 48 em diante
+;
+; Objetivo:
+;   - Percorrer a tabela de primos na RAM
+;   - Testar se 899 é divisível por cada primo encontrado
+;   - Colocar o primeiro divisor encontrado em bus_debug
+;   - Colocar 0 em bit_debug (899 não é primo: 899 = 29 x 31)
+;
+; Resultado esperado:
+;   bus_debug = 29 (0x001D) — menor divisor primo de 899
+;   bit_debug = 0           — 899 não é primo
+; =====================================================
+
+; [código da Pessoa 2 a partir do endereço 48]
+
+
+; =====================================================
+; RESULTADO ESPERADO NA RAM APÓS OS BLOCOS 1-5:
+;
+; RAM[ 2] =  2  (primo)
+; RAM[ 3] =  3  (primo)
+; RAM[ 4] =  0  (2x2)
+; RAM[ 5] =  5  (primo)
+; RAM[ 6] =  0  (2x3)
+; RAM[ 7] =  7  (primo)
+; RAM[ 8] =  0  (2x4)
+; RAM[ 9] =  0  (3x3)
+; RAM[10] =  0  (2x5)
+; RAM[11] = 11  (primo)
+; RAM[12] =  0  (2x6)
+; RAM[13] = 13  (primo)
+; RAM[14] =  0  (2x7)
+; RAM[15] =  0  (3x5)
+; RAM[16] =  0  (2x8)
+; RAM[17] = 17  (primo)
+; RAM[18] =  0  (2x9)
+; RAM[19] = 19  (primo)
+; RAM[20] =  0  (2x10)
+; RAM[21] =  0  (3x7)
+; RAM[22] =  0  (2x11)
+; RAM[23] = 23  (primo)
+; RAM[24] =  0  (2x12)
+; RAM[25] =  0  (5x5)
+; RAM[26] =  0  (2x13)
+; RAM[27] =  0  (3x9)
+; RAM[28] =  0  (2x14)
+; RAM[29] = 29  (primo)
+; RAM[30] =  0  (2x15)
+; RAM[31] = 31  (primo)
+; RAM[32] =  0  (2x16)
+;
+; Primos encontrados: 2,3,5,7,11,13,17,19,23,29,31
+; =====================================================

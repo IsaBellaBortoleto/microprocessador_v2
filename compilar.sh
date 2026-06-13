@@ -8,7 +8,7 @@ ghdl -a BANCO/reg16bits.vhd
 ghdl -a UC/reg1bit.vhd
 ghdl -a PC/pc.vhd
 ghdl -a ROM/rom.vhd
-ghdl -a RAM/ram.vhd          # novo no Lab 7 — precisa vir antes do processador.vhd
+ghdl -a RAM/ram.vhd
 ghdl -a ULA/ula.vhd
 ghdl -a BANCO/banco_regs.vhd
 ghdl -a UC/maquina_estados.vhd
@@ -22,10 +22,15 @@ ghdl -a UC/un_control.vhd
 ghdl -a processador.vhd
 ghdl -a processador_tb.vhd
 
-# Simulação — 25us para cobrir as 24 instruções do Lab 7
+# Lab 8 — tempo aumentado para cobrir o crivo completo:
+# Bloco 1: 31 iterações x 8 instruções = ~248 instruções
+# Blocos 2-5: ~60 iterações x 8 instruções = ~480 instruções
+# Bloco 6 (Pessoa 2): ~50 instruções estimadas
+# Total ~780 instruções x 3 estados x 10ns = ~23.4us só de execução
+# Com overhead do reset e latência da ROM: 150us é seguro
 echo "Executando simulação..."
-ghdl -r processador_tb --wave=processador_tb.ghw --stop-time=25us
+ghdl -r processador_tb --wave=processador_tb.ghw --stop-time=150us
 
 echo "Simulação concluída!"
 echo "Abrindo GTKWave..."
-gtkwave processador_tb.ghw   
+gtkwave processador_tb.ghw
