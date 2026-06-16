@@ -4,8 +4,8 @@
 Write-Host "Iniciando compilação com GHDL..."
 
 # Componentes base (sem dependências)
-ghdl -a REGS/reg16bits.vhd
-ghdl -a REGS/reg1bit.vhd
+ghdl -a BANCO/reg16bits.vhd
+ghdl -a UC/reg1bit.vhd
 ghdl -a PC/pc.vhd
 ghdl -a ROM/rom.vhd
 ghdl -a RAM/ram.vhd          # adicionado no Lab 7, mantido no Lab 8
@@ -33,7 +33,7 @@ ghdl -e processador_tb
 # Total ~780 instruções x 3 estados x 10ns = ~23.4us de execução pura
 # Com overhead do reset e latência da ROM: 150us é seguro
 Write-Host "Executando simulação..."
-ghdl -r processador_tb --wave=processador_tb.ghw --stop-time=150us
+ghdl -r processador_tb --wave=processador_tb.ghw --stop-time=151us
 
 Write-Host "Simulação concluída! Arquivo de onda gerado: processador_tb.ghw"
 

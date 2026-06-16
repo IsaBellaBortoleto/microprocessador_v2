@@ -26,7 +26,11 @@ ARCHITECTURE sim OF processador_tb IS
 
             -- Lab 7: pinos observáveis da RAM
             ram_dado_out_obs : OUT unsigned(15 DOWNTO 0);
-            ram_endereco_obs : OUT unsigned(6 DOWNTO 0)
+            ram_endereco_obs : OUT unsigned(6 DOWNTO 0);
+
+            -- Pinos de validação (Lab 8)
+            bus_debug : OUT unsigned(15 DOWNTO 0);
+            bit_debug : OUT STD_LOGIC
         );
     END COMPONENT;
 
@@ -49,6 +53,10 @@ ARCHITECTURE sim OF processador_tb IS
     SIGNAL ram_dado_out_obs : unsigned(15 DOWNTO 0);
     SIGNAL ram_endereco_obs : unsigned(6 DOWNTO 0);
 
+    -- Lab 8: sinais de validação
+    SIGNAL bus_debug : unsigned(15 DOWNTO 0);
+    SIGNAL bit_debug : STD_LOGIC;
+
     -- Período do clock
     CONSTANT clk_period : TIME := 10 ns;
 
@@ -70,7 +78,11 @@ BEGIN
         flag_v_out => flag_v_out,
         -- Lab 7: mapeamento dos novos pinos
         ram_dado_out_obs => ram_dado_out_obs,
-        ram_endereco_obs => ram_endereco_obs
+        ram_endereco_obs => ram_endereco_obs,
+
+        -- Lab 8
+        bus_debug => bus_debug,
+        bit_debug => bit_debug
     );
 
     -- Geração do Clock
@@ -90,8 +102,26 @@ BEGIN
 
         rst <= '0'; -- Libera o processador para rodar
 
-        -- Aumentado para dar tempo de rodar todas as repetições do loop
-        WAIT FOR 25000 ns;
+        -- O Lab 8 tem 78 instruções (Crivo + verificação de 899).
+        -- Cada instrução leva 3 estados (FETCH/DECODE/EXECUTE) = 30ns.
+        -- 78 instrucoes x 30ns = 2340ns de execucao pura, mas o crivo
+        -- tem loops que repetem (Bloco 1: 31 iteracoes, Blocos 2-5:
+        -- ~60 iteracoes somadas, Bloco 6: ate 10 testes de divisor).
+        -- 150us garante folga ampla para tudo terminar e travar no
+        -- loop infinito final.
+        WAIT FOR 150 us;
+
+        -- REMOVER (FOI FEITO APENAS PARA VER SE O TESTE FUNCIONA E GERAR O WAVE)
+        -- Mensagens de verificação para o relatório/terminal 
+        ASSERT bus_debug = x"001D"
+        REPORT "FALHA: bus_debug deveria ser 29 (0x001D)"
+            SEVERITY WARNING;
+
+        ASSERT bit_debug = '0'
+        REPORT "FALHA: bit_debug deveria ser 0 (899 nao e primo)"
+            SEVERITY WARNING;
+
+        REPORT "Simulacao concluida. bus_debug e bit_debug verificados.";
 
         -- Encerra a simulação automaticamente
         WAIT;

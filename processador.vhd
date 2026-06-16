@@ -55,8 +55,8 @@ ARCHITECTURE a_processador OF processador IS
             read_sel : IN unsigned(3 DOWNTO 0);
             data_in : IN unsigned(15 DOWNTO 0);
             data_out : OUT unsigned(15 DOWNTO 0);
-                    r3_out : OUT unsigned(15 DOWNTO 0);
-        r4_out : OUT unsigned(15 DOWNTO 0)
+            r3_out : OUT unsigned(15 DOWNTO 0);
+            r4_out : OUT unsigned(15 DOWNTO 0)
         );
     END COMPONENT;
 
@@ -183,6 +183,7 @@ ARCHITECTURE a_processador OF processador IS
 
     -- crivo de Eratóstenes (Lab 8)
     SIGNAL fio_bus_debug : unsigned(15 DOWNTO 0);
+    SIGNAL fio_bit_debug_full : unsigned(15 DOWNTO 0);
     SIGNAL fio_bit_debug : STD_LOGIC;
 
 BEGIN
@@ -230,9 +231,7 @@ BEGIN
 
     -- Lab 8: sinais de debug para o GTKWave
     bus_debug <= fio_bus_debug;
-    bit_debug <= fio_bit_debug;
-
-
+    bit_debug <= fio_bit_debug_full(0);
     -- =======================================================
     -- 4. INSTANCIAÇÕES (PLUGANDO OS COMPONENTES)
     -- =======================================================
@@ -302,8 +301,8 @@ BEGIN
         read_sel => read_sel,
         data_in => fio_in_data_banco,
         data_out => fio_out_banco,
-        r3_out => fio_bus_debug, 
-        r4_out => fio_bit_debug
+        r3_out => fio_bus_debug,
+        r4_out => fio_bit_debug_full
     );
 
     inst_acc : reg16bits PORT MAP(

@@ -1,40 +1,40 @@
 v 4
-file . "RAM/ram.vhd" "058bc3af58c6fd41a91640fc4ca21f2eefc4e701" "20260613211923.489":
-  entity ram at 1( 0) + 0 on 63;
-  architecture a_ram of ram at 15( 464) + 0 on 64;
-file . "processador.vhd" "5528af7085fdd172e86dad1fd263bb9432e829a9" "20260613211923.964":
-  entity processador at 1( 0) + 0 on 77;
-  architecture a_processador of processador at 32( 1029) + 0 on 78;
-file . "PC/pc_rom_top.vhd" "678f1cc73b1302abd3a6023b8901427b8c72f5ec" "20260613211923.841":
-  entity pc_rom_top at 6( 335) + 0 on 73;
-  architecture a_pc_rom_top of pc_rom_top at 19( 593) + 0 on 74;
-file . "UC/maquina_estados.vhd" "a0da1d49dd0130aeef8a0e5c3fee62dce4e6c9ad" "20260613211923.690":
-  entity maquina_estados at 8( 429) + 0 on 69;
-  architecture a_maquina_estados of maquina_estados at 20( 655) + 0 on 70;
-file . "ULA/ula.vhd" "478faff6335cf5775cf1ea7130d1eb5680e65343" "20260613211923.550":
-  entity ula at 9( 316) + 0 on 65;
-  architecture a_ula of ula at 37( 1077) + 0 on 66;
-file . "PC/pc.vhd" "ceb77019ec66dd7e032d12cc9beacf6f91732b70" "20260613211923.367":
-  entity pc at 6( 333) + 0 on 59;
-  architecture a_pc of pc at 19( 619) + 0 on 60;
-file . "BANCO/reg16bits.vhd" "6ffe074c4b79c79fb21805ed2d6cba061aa855b6" "20260601201630.133":
-  entity reg16bits at 65( 1973) + 0 on 35;
-  architecture a_reg16bits of reg16bits at 78( 2268) + 0 on 36;
-file . "UC/reg1bit.vhd" "6c62ac5ef1edcbf0f94b16b294b8425a81c7b7d2" "20260601201630.165":
-  entity reg1bit at 7( 390) + 0 on 37;
-  architecture a_reg1bit of reg1bit at 20( 661) + 0 on 38;
-file . "ROM/rom.vhd" "1fe6f4b055468d4daeebe3a8541d59f092fc5659" "20260613211923.438":
-  entity rom at 1( 0) + 0 on 61;
-  architecture a_rom of rom at 13( 228) + 0 on 62;
-file . "BANCO/banco_regs.vhd" "c15a6f0fde09dec4c3b78c7299310191c8cdae51" "20260613211923.643":
-  entity banco_regs at 1( 0) + 0 on 67;
-  architecture a_banco_regs of banco_regs at 20( 676) + 0 on 68;
-file . "PC/incr_pc.vhd" "fd39e42f21a10bc017df41d40061fe0e3088f1b3" "20260613211923.789":
-  entity incr_pc at 6( 332) + 0 on 71;
-  architecture a_incr_pc of incr_pc at 19( 575) + 0 on 72;
-file . "UC/un_control.vhd" "2a43a9e65a9dc1d92818782d1f89c92170ef82e5" "20260613211923.921":
-  entity un_control at 1( 0) + 0 on 75;
-  architecture a_un_control of un_control at 35( 1127) + 0 on 76;
-file . "processador_tb.vhd" "1cec5ee1ed3caef41ba06369ba205cc92d1f60fa" "20260613211924.041":
-  entity processador_tb at 1( 0) + 0 on 79;
-  architecture sim of processador_tb at 8( 108) + 0 on 80;
+file . "processador_tb.vhd" "80f72f705842546b3aafac4221d3b2cea8772f11" "20260616224331.096":
+  entity processador_tb at 1( 0) + 0 on 221;
+  architecture sim of processador_tb at 8( 108) + 0 on 222;
+file . "UC/un_control.vhd" "2a43a9e65a9dc1d92818782d1f89c92170ef82e5" "20260616224331.028":
+  entity un_control at 1( 0) + 0 on 217;
+  architecture a_un_control of un_control at 35( 1127) + 0 on 218;
+file . "PC/incr_pc.vhd" "fd39e42f21a10bc017df41d40061fe0e3088f1b3" "20260616224330.965":
+  entity incr_pc at 6( 332) + 0 on 213;
+  architecture a_incr_pc of incr_pc at 19( 575) + 0 on 214;
+file . "BANCO/banco_regs.vhd" "eae0178f9a6746c155d7c541c62f9fac111ae159" "20260616224330.901":
+  entity banco_regs at 1( 0) + 0 on 209;
+  architecture a_banco_regs of banco_regs at 25( 908) + 0 on 210;
+file . "ROM/rom.vhd" "c6a4305a51fc79c0fc68248397521df4492694cc" "20260616224330.805":
+  entity rom at 1( 0) + 0 on 203;
+  architecture a_rom of rom at 13( 228) + 0 on 204;
+file . "UC/reg1bit.vhd" "6c62ac5ef1edcbf0f94b16b294b8425a81c7b7d2" "20260616224330.739":
+  entity reg1bit at 7( 390) + 0 on 199;
+  architecture a_reg1bit of reg1bit at 20( 661) + 0 on 200;
+file . "BANCO/reg16bits.vhd" "6ffe074c4b79c79fb21805ed2d6cba061aa855b6" "20260616224330.704":
+  entity reg16bits at 65( 1973) + 0 on 197;
+  architecture a_reg16bits of reg16bits at 78( 2268) + 0 on 198;
+file . "PC/pc.vhd" "ceb77019ec66dd7e032d12cc9beacf6f91732b70" "20260616224330.773":
+  entity pc at 6( 333) + 0 on 201;
+  architecture a_pc of pc at 19( 619) + 0 on 202;
+file . "ULA/ula.vhd" "478faff6335cf5775cf1ea7130d1eb5680e65343" "20260616224330.868":
+  entity ula at 9( 316) + 0 on 207;
+  architecture a_ula of ula at 37( 1077) + 0 on 208;
+file . "UC/maquina_estados.vhd" "a0da1d49dd0130aeef8a0e5c3fee62dce4e6c9ad" "20260616224330.932":
+  entity maquina_estados at 8( 429) + 0 on 211;
+  architecture a_maquina_estados of maquina_estados at 20( 655) + 0 on 212;
+file . "PC/pc_rom_top.vhd" "678f1cc73b1302abd3a6023b8901427b8c72f5ec" "20260616224330.996":
+  entity pc_rom_top at 6( 335) + 0 on 215;
+  architecture a_pc_rom_top of pc_rom_top at 19( 593) + 0 on 216;
+file . "processador.vhd" "763c0d661e2f2d1aac1d209be8b605d812ff768b" "20260616224331.062":
+  entity processador at 1( 0) + 0 on 219;
+  architecture a_processador of processador at 32( 1029) + 0 on 220;
+file . "RAM/ram.vhd" "058bc3af58c6fd41a91640fc4ca21f2eefc4e701" "20260616224330.835":
+  entity ram at 1( 0) + 0 on 205;
+  architecture a_ram of ram at 15( 464) + 0 on 206;
