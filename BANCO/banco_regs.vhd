@@ -13,7 +13,12 @@ ENTITY banco_regs IS
         read_sel : IN unsigned(3 DOWNTO 0); -- Seletor de qual registrador vai ser LIDO
 
         data_in : IN unsigned(15 DOWNTO 0); -- Dado que vem de fora para ser gravado
-        data_out : OUT unsigned(15 DOWNTO 0) -- Dado lido que vai para a ULA
+        data_out : OUT unsigned(15 DOWNTO 0); -- Dado lido que vai para a ULA
+
+        -- Lab 8: saídas fixas para observar R3 (bus_debug) e R4 (bit_debug)
+        -- sem depender do read_sel da instrução em execução
+        r3_out : OUT unsigned(15 DOWNTO 0);
+        r4_out : OUT unsigned(15 DOWNTO 0)
     );
 END ENTITY;
 
@@ -90,5 +95,9 @@ BEGIN
         q8 WHEN read_sel = "1000" ELSE
         q9 WHEN read_sel = "1001" ELSE
         "0000000000000000"; -- Segurança: se pedirem um endereço inválido (ex: 10 a 15), sai zero.
+
+    -- Lab 8: conexão direta dos registradores R3 e R4 para os pinos de debug
+    r3_out <= q3;
+    r4_out <= q4;
 
 END ARCHITECTURE;

@@ -142,21 +142,126 @@
 
 ; =====================================================
 ; BLOCO 6 — Verificação de 899 (Pessoa 2)
-; Endereços: 48 em diante
+; UTFPR — Arquitetura de Computadores
 ;
-; Objetivo:
-;   - Percorrer a tabela de primos na RAM
-;   - Testar se 899 é divisível por cada primo encontrado
-;   - Colocar o primeiro divisor encontrado em bus_debug
-;   - Colocar 0 em bit_debug (899 não é primo: 899 = 29 x 31)
+; Objetivo: percorrer a tabela de primos construída pelo
+; Crivo de Eratóstenes (Blocos 1-5) e testar se 899 é
+; divisível por cada primo encontrado, usando subtração
+; repetida (já que não há instrução de divisão).
 ;
 ; Resultado esperado:
-;   bus_debug = 29 (0x001D) — menor divisor primo de 899
-;   bit_debug = 0           — 899 não é primo
+;   bus_debug (R11) = 29  (0x001D) — menor divisor primo de 899
+;   bit_debug (R12) = 0              — 899 NÃO é primo (899 = 29 x 31)
+;
+; Endereços: 48 a 77
 ; =====================================================
 
-; [código da Pessoa 2 a partir do endereço 48]
+; -----------------------------------------------------
+; Como funciona o teste de divisibilidade:
+;
+; Para testar se 899 é divisível por um número D, subtraímos
+; D de 899 repetidamente:
+;   899 - D - D - D - ... até o resultado ficar <= 0
+;
+; Se o resultado final for EXATAMENTE 0: D é divisor.
+; Se ficar NEGATIVO (sem nunca passar por 0): D não é divisor.
+;
+; As flags da ULA distinguem os dois casos finais:
+;   resultado == 0 (achou):        Z=1, C=1
+;   resultado <  0 (não divisor):  Z=0, C=0  (pois deu borrow)
+;
+; A condição do BHI (C=1 e Z=0) é verdadeira apenas enquanto
+; o resultado ainda é > 0 — ou seja, "ainda não terminei".
+; Quando o BHI deixa de saltar, fazemos um CMPR R7 (R7=0 fixo)
+; para reconferir a mesma condição: se ainda for C=1 e Z=0
+; significa que o resultado "deu a volta" como número negativo
+; (visto como valor grande em unsigned) — não é divisor.
+; Caso contrário (Z=1), o resultado foi exatamente zero — achou!
+; -----------------------------------------------------
 
+; Registradores reservados para este bloco:
+;   R7  → zero fixo (usado nos testes CMPR R7, equivalente a "CMPR 0")
+;   R8  → ponteiro de leitura da tabela de primos (varia de 2 a 32)
+;   R9  → primo candidato lido da RAM (testado como possível divisor)
+;   R11 → bus_debug — guarda o primeiro divisor encontrado
+;   R12 → bit_debug — fixo em 0 (899 não é primo, sempre será encontrado um divisor)
+;   R13 → constante 899 (construída em 4 instruções, pois LD só aceita até 255)
+;   R14 → constante 33 (limite do loop de primos, igual aos blocos 1-5)
+
+; --- inicialização ---
+[end. 48] LD  R7, 0          ; R7 = 0 (zero fixo, para os testes CMPR R7)
+[end. 49] LD  R8, 2          ; R8 = 2 (primeira posição da tabela a verificar)
+[end. 50] LD  R12, 0         ; R12 = 0 (bit_debug: 899 não é primo)
+[end. 51] LD  R14, 33        ; R14 = 33 (limite do loop de primos)
+
+; --- construção da constante 899 ---
+; LD só aceita constantes de 0 a 255 (8 bits). Como 899 > 255,
+; construímos o valor em 4 etapas: 225+225+225+224 = 899
+[end. 52] LD  R13, 225       ; R13 = 225 (primeira parcela)
+[end. 53] MOV_A R13          ; A = 225
+[end. 54] ADDI 225           ; A = 450
+[end. 55] ADDI 225           ; A = 675
+[end. 56] ADDI 224           ; A = 899
+[end. 57] MOV_R R13          ; R13 = 899 (constante pronta para reuso)
+
+; -----------------------------------------------------
+; loop_primos (início no endereço 58)
+; Percorre RAM[2..32]; pula posições zeradas (não-primos)
+; -----------------------------------------------------
+[end. 58] LW   R9, (R8)      ; R9 = RAM[R8]  — lê o candidato
+[end. 59] MOV_A R9           ; A = R9
+[end. 60] CMPR R7            ; testa se R9 == 0 (posição eliminada pelo crivo)
+[end. 61] BHI 63             ; se R9 > 0: é um primo válido → testa_divisor
+[end. 62] JMP +8             ; se R9 == 0: pula direto para proximo_primo (end. 71)
+
+; -----------------------------------------------------
+; testa_divisor (início no endereço 63)
+; Recarrega A=899 e inicia a subtração repetida
+; -----------------------------------------------------
+[end. 63] MOV_A R13          ; A = 899 (recarrega antes de cada novo teste)
+
+; loop_sub (início no endereço 64)
+[end. 64] SUB   R9            ; A = A - R9
+[end. 65] BHI 64             ; se A > 0: ainda não terminou, repete a subtração
+
+; saiu do loop_sub: A é 0 (achou) ou "negativo" (visto como número
+; grande em unsigned, pois é complemento de 2)
+[end. 66] CMPR R7            ; recalcula flags comparando A contra 0
+[end. 67] BHI 71             ; se A > 0 (caso negativo-grande): NÃO é divisor → proximo_primo
+
+; --- achou o divisor! ---
+[end. 68] MOV_A R9           ; A = R9 (o divisor que funcionou)
+[end. 69] MOV_R R11          ; R11 = A = R9  → grava em bus_debug
+[end. 70] JMP +6             ; já achamos o menor divisor, pula direto para o fim (end. 77)
+
+; -----------------------------------------------------
+; proximo_primo (início no endereço 71)
+; Avança o ponteiro da tabela e verifica se o loop continua
+; -----------------------------------------------------
+[end. 71] MOV_A R8           ; A = R8
+[end. 72] ADDI 1             ; A = R8 + 1
+[end. 73] MOV_R R8           ; R8 = A (avança o ponteiro)
+[end. 74] MOV_A R14          ; A = 33
+[end. 75] CMPR R8            ; flags = 33 - R8
+[end. 76] BHI 58             ; se 33 > R8: volta para loop_primos
+
+; -----------------------------------------------------
+; fim (endereço 77) — loop infinito, trava aqui
+; -----------------------------------------------------
+[end. 77] JMP -1             ; PC = 78 + (-1) = 77 (trava nesta instrução)
+
+
+; =====================================================
+; RESULTADO ESPERADO (confirmado por simulação manual):
+;
+; O algoritmo testa os primos na ordem: 2, 3, 5, 7, 11, 13,
+; 17, 19, 23 — nenhum divide 899 — até chegar em 29.
+;
+; 899 ÷ 29 = 31 (subtração repetida 31 vezes, resultado final = 0)
+;
+; bus_debug (R11) = 29 = 0x001D = 0000000000011101 (binário)
+; bit_debug (R12) = 0
+; =====================================================
 
 ; =====================================================
 ; RESULTADO ESPERADO NA RAM APÓS OS BLOCOS 1-5:

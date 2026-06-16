@@ -54,7 +54,9 @@ ARCHITECTURE a_processador OF processador IS
             write_sel : IN unsigned(3 DOWNTO 0);
             read_sel : IN unsigned(3 DOWNTO 0);
             data_in : IN unsigned(15 DOWNTO 0);
-            data_out : OUT unsigned(15 DOWNTO 0)
+            data_out : OUT unsigned(15 DOWNTO 0);
+                    r3_out : OUT unsigned(15 DOWNTO 0);
+        r4_out : OUT unsigned(15 DOWNTO 0)
         );
     END COMPONENT;
 
@@ -183,8 +185,6 @@ ARCHITECTURE a_processador OF processador IS
     SIGNAL fio_bus_debug : unsigned(15 DOWNTO 0);
     SIGNAL fio_bit_debug : STD_LOGIC;
 
- 
-
 BEGIN
     -- =======================================================
     -- 3. DECODIFICAÇÃO DE FIOS E MULTIPLEXADORES
@@ -232,10 +232,6 @@ BEGIN
     bus_debug <= fio_bus_debug;
     bit_debug <= fio_bit_debug;
 
-
-    -- TODO: pesssoa 2 - PLACEHOLDER até os registradores de resultado serem definidos
-    fio_bus_debug <= (OTHERS => '0'); -- será conectado ao registrador de resultado
-    fio_bit_debug <= '0'; -- será conectado ao registrador de primo/não primo
 
     -- =======================================================
     -- 4. INSTANCIAÇÕES (PLUGANDO OS COMPONENTES)
@@ -305,7 +301,9 @@ BEGIN
         write_sel => write_sel,
         read_sel => read_sel,
         data_in => fio_in_data_banco,
-        data_out => fio_out_banco
+        data_out => fio_out_banco,
+        r3_out => fio_bus_debug, 
+        r4_out => fio_bit_debug
     );
 
     inst_acc : reg16bits PORT MAP(
