@@ -19,19 +19,22 @@ ARCHITECTURE a_rom OF rom IS
         -- RAM[n] = n → primo | RAM[n] = 0 → não primo
         -- =====================================================
 
+        -- =====================================================
         -- BLOCO 1: Preenche RAM[2..32] com RAM[n] = n
-        0 => "0001010000000010", -- LD  R4, 2     contador
-        1 => "0001010100100001", -- LD  R5, 33    limite
+        -- CORRIGIDO: Agora os binários usam R2 (0010) em vez de R4 (0100)
+        -- =====================================================
+        0 => "0001001000000010", -- LD  R2, 2      contador
+        1 => "0001010100100001", -- LD  R5, 33     limite
         -- loop (endereço 2)
-        2 => "0010000001000000", -- MOV_A R4      A = contador
-        3 => "1100000001000000", -- SW (R4)       RAM[R4] = A
-        4 => "0010000001000000", -- MOV_A R4      A = R4
-        5 => "0101000000000001", -- ADDI 1        A = A + 1
-        6 => "0011010000000000", -- MOV_R R4      R4 = A
-        7 => "0010000001010000", -- MOV_A R5      A = 33
-        8 => "0111000001000000", -- CMPR R4       33 - R4
-        9 => "1001000000000010", -- BHI 2         se 33 > R4: volta
-        -----------------------------------------------------------------
+        2 => "0010000000100000", -- MOV_A R2       A = contador
+        3 => "1100000000100000", -- SW (R2)        RAM[R2] = A
+        4 => "0010000000100000", -- MOV_A R2       A = R2
+        5 => "0101000000000001", -- ADDI 1         A = A + 1
+        6 => "0011001000000000", -- MOV_R R2       R2 = A
+        7 => "0010000001010000", -- MOV_A R5       A = 33
+        8 => "0111000000100000", -- CMPR R2        33 - R2
+        9 => "1001000000000010", -- BHI 2          se 33 > R2: volta
+
         -- BLOCO 2: Elimina múltiplos de 2 (RAM[4,6,8...32] = 0)
         10 => "0001000100000100", -- LD  R1, 4     contador
         11 => "0001011000000000", -- LD  R6, 0     zero
@@ -124,7 +127,7 @@ ARCHITECTURE a_rom OF rom IS
         59 => "0010000000100000", -- MOV_A R2      A = R2
         60 => "0111000000000000", -- CMPR R0       testa R2 == 0
         61 => "1001000000111111", -- BHI 63        se R2>0: testa_divisor
-        62 => "1000000000001000", -- JMP +8        se R2==0: proximo_primo
+        62 => "1000000000001001", -- JMP +9 (62 + 9 = 71)        se R2==0: proximo_primo
  
         -- testa_divisor (endereço 63)
         63 => "0010000001010000", -- MOV_A R5      A = 899
@@ -140,7 +143,7 @@ ARCHITECTURE a_rom OF rom IS
         -- achou o divisor!
         68 => "0010000000100000", -- MOV_A R2      A = R2 (divisor)
         69 => "0011001100000000", -- MOV_R R3      R3 = R2 (bus_debug)
-        70 => "1000000000000110", -- JMP +6        pula pro fim
+        70 => "1000000000000111", -- JMP +7 (70 + 7 = 77)        pula pro fim
  
         -- proximo_primo (endereço 71)
         71 => "0010000000010000", -- MOV_A R1      A = R1
@@ -151,7 +154,7 @@ ARCHITECTURE a_rom OF rom IS
         76 => "1001000000111010", -- BHI 58        se 33 > R1: loop_primos
  
         -- fim (endereço 77): loop infinito, trava aqui
-        77 => "1000000011111111", -- JMP -1
+        77 => "1000000000000000", -- JMP +0 (77 + 0 = 77)
  
         OTHERS => (OTHERS => '0')
 
